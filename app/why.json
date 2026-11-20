@@ -1,0 +1,93 @@
+{
+ "period": "2013-2021",
+ "modis_cell_days": 16387588,
+ "viirs_cell_days": 43240441,
+ "ratio": 2.64,
+ "both": 11175301,
+ "viirs_only": 32065140,
+ "modis_only": 5212287,
+ "by_power": [
+  {
+   "power_mw": "under 2",
+   "viirs_cell_days": 4783720,
+   "share_of_viirs": 0.1106,
+   "modis_also_saw": 0.0571,
+   "median_viirs_pixels": 1.0
+  },
+  {
+   "power_mw": "2–5",
+   "viirs_cell_days": 9779712,
+   "share_of_viirs": 0.2262,
+   "modis_also_saw": 0.1022,
+   "median_viirs_pixels": 1.0
+  },
+  {
+   "power_mw": "5–10",
+   "viirs_cell_days": 8917899,
+   "share_of_viirs": 0.2062,
+   "modis_also_saw": 0.1684,
+   "median_viirs_pixels": 1.0
+  },
+  {
+   "power_mw": "10–20",
+   "viirs_cell_days": 7520760,
+   "share_of_viirs": 0.1739,
+   "modis_also_saw": 0.2658,
+   "median_viirs_pixels": 2.0
+  },
+  {
+   "power_mw": "20–50",
+   "viirs_cell_days": 6686858,
+   "share_of_viirs": 0.1546,
+   "modis_also_saw": 0.4129,
+   "median_viirs_pixels": 4.0
+  },
+  {
+   "power_mw": "50–100",
+   "viirs_cell_days": 2876513,
+   "share_of_viirs": 0.0665,
+   "modis_also_saw": 0.574,
+   "median_viirs_pixels": 6.0
+  },
+  {
+   "power_mw": "100–300",
+   "viirs_cell_days": 2010160,
+   "share_of_viirs": 0.0465,
+   "modis_also_saw": 0.7103,
+   "median_viirs_pixels": 10.0
+  },
+  {
+   "power_mw": "over 300",
+   "viirs_cell_days": 664819,
+   "share_of_viirs": 0.0154,
+   "modis_also_saw": 0.8467,
+   "median_viirs_pixels": 22.0
+  }
+ ],
+ "single_pixel": {
+  "share_of_viirs": 0.4584,
+  "modis_also_saw": 0.1181
+ },
+ "five_plus_pixels": {
+  "share_of_viirs": 0.1708,
+  "modis_also_saw": 0.6095
+ },
+ "pixels": {
+  "MODIS": {
+   "hotspots_sampled": 196105,
+   "median_pixel_km2": 1.43,
+   "smallest_pixel_km2": 1.0,
+   "median_frp_mw": 20.7,
+   "share_under_5mw": 0.011,
+   "night_share": 0.086
+  },
+  "VIIRS": {
+   "hotspots_sampled": 778201,
+   "median_pixel_km2": 0.2,
+   "smallest_pixel_km2": 0.14,
+   "median_frp_mw": 5.4,
+   "share_under_5mw": 0.462,
+   "night_share": 0.189
+  }
+ }
+}

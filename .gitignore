@@ -1,0 +1,14 @@
+# Code only: ignore everything, then allow the source files back in.
+# Data (data/, ~3 GB), fitted models, docs and score tables are kept out of the repo.
+*
+!/.gitignore
+!/README.md
+!/start.bat
+!app/
+!app/*.js
+!app/*.html
+!app/*.css
+!app/*.py
+!app/why.json
+!harmonize/
+!harmonize/*.py

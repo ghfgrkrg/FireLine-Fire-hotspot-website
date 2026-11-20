@@ -1,0 +1,172 @@
+<!doctype html>
+<!-- SI/AI disclosure: written with Claude Code (Anthropic), an AI assistant, working with team Paween_and_Kpunn. See README.md. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FireLine</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23de5a12'/%3E%3Ccircle cx='13' cy='13' r='5' fill='%23fdbf86'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="dot"></span>FireLine</div>
+  <div class="tag">One consistent fire record from MODIS and VIIRS, <span id="span">2001 to today</span></div>
+  <button id="themeBtn" class="ghost">Light mode</button>
+  <button id="aboutBtn" class="ghost">How it works</button>
+</header>
+
+<main class="layout">
+  <section class="mapcol">
+    <div class="controls">
+      <div class="search">
+        <input id="q" type="search" placeholder="Search a country, province or town" autocomplete="off" aria-label="Search a place">
+        <ul id="sugg" hidden></ul>
+      </div>
+      <div class="btnrow">
+        <button id="drawBtn" title="Drag a rectangle on the map">Draw area</button>
+        <button id="coordBtn">Coordinates</button>
+        <button id="worldBtn">Whole world</button>
+      </div>
+      <form id="coordForm" hidden>
+        <label>South<input name="s" type="number" step="any" min="-90" max="90" required></label>
+        <label>West<input name="w" type="number" step="any" min="-180" max="180" required></label>
+        <label>North<input name="n" type="number" step="any" min="-90" max="90" required></label>
+        <label>East<input name="e" type="number" step="any" min="-180" max="180" required></label>
+        <button type="submit" class="primary">Apply</button>
+      </form>
+      <div class="chips" id="chips"><span>Try</span></div>
+    </div>
+    <div id="map"></div>
+    <div class="mapfoot">
+      <span id="mapYearGrp" class="grp">
+        <label for="mapYear">Map shows</label>
+        <select id="mapYear"></select>
+        <span class="seg sm" role="group" aria-label="Map style">
+          <button id="style_heat" class="on" title="Smoothed heat map of the 0.1° squares">Heat map</button><button id="style_grid" title="The 0.1° squares themselves, unsmoothed">Squares</button>
+        </span>
+        <span class="maplg"><span id="mapRampLo">0</span><i id="mapRamp"></i><span id="mapRampHi"></span></span>
+      </span>
+      <span id="mapDotGrp" class="grp" hidden>
+        <span id="mapDotLbl"></span>
+        <span class="dotk"><i style="background:#c2330c"></i>one hotspot</span>
+      </span>
+      <span class="hint">Click a country, then a province</span>
+      <div class="mapnote"><span id="mapUnit"></span> <span id="mapRead" class="read"></span></div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel">
+    <div class="areahead">
+      <div>
+        <h1 id="areaName">Whole world</h1>
+        <div id="areaMeta" class="meta"></div>
+      </div>
+      <div class="range">
+        <label>From<input id="from" type="month"></label>
+        <label>To<input id="to" type="month"></label>
+      </div>
+    </div>
+    <div id="status" class="status" hidden></div>
+    <p class="intro" id="intro"><b>Start here.</b> Pick a place on the map: click a country, search a name, or draw a box. Everything on this side then shows the fire history of that place, from 2001 to today.</p>
+
+    <div class="kpis" id="kpis"></div>
+    <p class="how"><b>How fire is counted.</b> The world is divided into squares of about 11 km. A square that burns on one day counts as 1. So 500 can mean 500 squares burning for a day, or 50 squares burning for 10 days. "Typical" is the middle value of all the years since 2003.</p>
+
+    <div class="card">
+      <div class="cardhead">
+        <div><h2>Burning calendar</h2><p id="calSub"></p></div>
+        <div class="tools">
+          <div class="seg" role="group" aria-label="Calendar columns">
+            <button id="resMonth" class="on">Months</button><button id="resWeek">Weeks</button>
+          </div>
+          <div class="seg" role="group" aria-label="Calendar colours">
+            <button id="modeCount" class="on">Fire activity</button><button id="modeAnom">Compared with typical</button>
+          </div>
+          <label class="chk"><input id="nums" type="checkbox"> Numbers</label>
+        </div>
+      </div>
+      <div id="calendar"></div>
+      <div class="legend" id="calLegend"></div>
+      <p class="how"><b>How to read it.</b> Each row is a year and each square is one month (or week) of that year. <span class="tone">Darker</span> means more fire. The bottom row shows a typical year. A dashed outline marks the month still in progress. Two things to keep in mind: before July 2002 only one of the two MODIS satellites was flying, so those months read low; and the last few months use early data that NASA later refines, so treat them as provisional. Click a square to see its days and where the fires were.</p>
+    </div>
+
+    <div class="card" id="dayCard" hidden>
+      <div class="cardhead">
+        <div><h2>Day by day: <span id="dayTitle"></span></h2><p id="daySum"></p></div>
+        <div class="tools">
+          <button id="dayPrev" class="ghost sm" aria-label="Earlier period">‹ Earlier</button>
+          <button id="dayNext" class="ghost sm" aria-label="Later period">Later ›</button>
+          <button id="dayClear" class="ghost sm">Close</button>
+        </div>
+      </div>
+      <div id="daily"></div>
+      <p class="how"><b>How to read it.</b> Each bar is one day. The highlighted bars are the period you picked. The dashed line is a typical day in that month. The red dots on the map are the fires the satellites saw in that period.</p>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="cardhead"><div><h2>Through the year</h2><p id="seaSub"></p></div></div>
+        <div class="lgrow" id="seaLegend"></div>
+        <div id="seasonal"></div>
+        <p class="how"><b>How to read it.</b> The grey band is the normal range for each month. A coloured line above the band means that month was unusually active.</p>
+      </div>
+      <div class="card">
+        <div class="cardhead"><div><h2>Year by year</h2><p id="annSub"></p></div></div>
+        <div class="lgrow" id="annLegend"></div>
+        <div id="annual"></div>
+        <p class="how"><b>How to read it.</b> One bar per year. Bars above the dashed line had more fire than a typical year. The straight line shows the long-term direction.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cardhead"><div><h2>Two sensors, one record</h2><p id="harSub"></p></div></div>
+      <div id="harmon"></div>
+      <p class="how"><b>How to read it.</b> Blue is the older sensor, MODIS. Orange is the newer one, VIIRS, as NASA delivers it: it reports far more fire because it sees smaller fires. Green is VIIRS after our conversion. Where green follows blue, the two sensors tell one story. <a href="#" id="whyLink">Why VIIRS sees more</a></p>
+    </div>
+
+    <div class="card">
+      <div class="cardhead"><div><h2>Download</h2><p id="dlSub"></p></div></div>
+      <div class="dl">
+        <button id="dlMonthly">Monthly table (CSV)</button>
+        <button id="dlHotspots">Hotspots in this area and period (CSV)</button>
+        <button id="dlPng">Calendar image (PNG)</button>
+        <span id="dlMsg" class="meta"></span>
+      </div>
+    </div>
+
+    <footer>
+      <p>We acknowledge the use of data and/or imagery from NASA's Fire Information for Resource Management System (FIRMS) (https://earthdata.nasa.gov/firms), part of NASA's Land, Atmosphere Near real-time Capability for Earth observations (LANCE) (https://earthdata.nasa.gov/lance) and NASA's Earth Science Data and Information System (ESDIS). Borders: Natural Earth. Basemap: Esri, HERE, Garmin, © OpenStreetMap contributors.</p>
+      <p>AI use: the code for this app and for the harmonization was written with the help of Claude Code (Anthropic), an AI assistant.</p>
+    </footer>
+  </section>
+</main>
+
+<dialog id="about">
+  <h2>How it works</h2>
+  <h3>The problem</h3>
+  <p>Two NASA instruments watch the world's fires. <b>MODIS</b> has done it since 2000 but is near the end of its life. <b>VIIRS</b> took over in 2012. For the same burning, VIIRS reports about <b id="wRatio">2.6</b> times as much fire as MODIS. Put the two records end to end and you get a jump in 2012 that never happened on the ground.</p>
+
+  <h3>Why VIIRS sees more</h3>
+  <p><b>1. Its pixels are much smaller.</b> A typical MODIS fire pixel covers <b id="wPm">1.4</b> km². A typical VIIRS one covers <b id="wPv">0.2</b> km², about <b id="wPx">7</b> times less ground. A small fire is a big part of a small pixel, so it stands out. Inside a large pixel the same fire is diluted by the cool ground around it and goes unnoticed.</p>
+  <p><b>2. So VIIRS catches the small fires.</b> <b id="wSv">46</b>% of VIIRS hotspots are weaker than 5 megawatts. For MODIS it is <b id="wSm">1</b>%.</p>
+  <p><b>3. MODIS misses most small fires and sees most large ones.</b> Take every place and day where VIIRS saw fire, sort them by how powerful the fire was, and ask how often MODIS saw fire there too:</p>
+  <div id="whyChart"></div>
+  <p class="cap">Share of VIIRS fire cell-days that MODIS also detected, by fire power (megawatts). All fires worldwide, 2013–2021.</p>
+  <p><b>The result:</b> <b id="wOnly">74</b>% of the fire VIIRS records was never seen by MODIS at all. That is where the extra comes from. It is real fire, not an error. It just means the two numbers cannot be compared as they are.</p>
+
+  <h3>What we do about it</h3>
+  <p>We count fire in grid squares per day instead of raw detections, which removes the effect of one fire lighting up many small pixels. Then, for every VIIRS fire, we estimate how MODIS would have counted it. The chart above is the heart of that: a weak fire counts for little, a strong one for almost a whole detection. The estimate also looks at what is burning nearby, how long the fire has burned, and where MODIS would have been in its 16-day orbit. Local and seasonal corrections finish the job.</p>
+
+  <h3>How well it works</h3>
+  <p>We tested it on 2019–2021, years the method never saw, when both instruments were flying. In areas of about 550 km, <b>96%</b> of fire activity lands within ±10% of what MODIS really recorded over three years, and <b>90%</b> in any single month. For comparison, two identical VIIRS satellites checked against each other reach 94%.</p>
+  <p>In this app the record is MODIS before 20 January 2012 and converted VIIRS after. "Typical" means the median of 2003 to the last full year. The chart "Two sensors, one record" shows the raw and converted lines for whatever area you choose.</p>
+  <form method="dialog"><button class="primary">Close</button></form>
+</dialog>
+<div id="tip" class="tip" hidden></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
