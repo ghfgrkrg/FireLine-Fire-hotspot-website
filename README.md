@@ -5,10 +5,13 @@ a burning calendar for any area, anomalies against the typical year, a 0.1° fir
 
 ## Run it
 
-1. Get the processed data and unzip it so that `data/app_data/index.json` sits next to `start.bat`
-   (download link: see the repository's Releases).
-2. Windows: double-click `start.bat`. macOS / Linux: `python3 app/serve.py`.
-3. Open http://localhost:8765 in Chrome, Edge or Firefox.
+1. Download the app with its data (3 GB):
+   **[FireLine on Google Drive](https://drive.google.com/file/d/1wrwv1C1TClSkm8U6fULUNfYjYelBcjWC/view?usp=sharing)**.
+   Google Drive warns that it can't scan a file this big for viruses; click "Download anyway".
+2. Unzip it (not from inside the zip), then double-click `start.bat` on Windows, or run `python3 app/serve.py` on macOS / Linux.
+3. FireLine opens at http://localhost:8765 in Chrome, Edge or Firefox.
+
+The zip holds this code plus the data. If you cloned this repository instead, copy the zip's `data` folder next to `start.bat`.
 
 Needs Python 3.8+ and an internet connection for the background map.
 
